@@ -1,6 +1,7 @@
 ; BOOT SECTOR FILE
-
 [org 0x7C00] ; Strings have this offset for some reason
+
+KERNEL_LOC equ 0x1000
 
 text:
 	db "Hello World!", 0x0a ; 0x0a is eol (\n)
@@ -156,25 +157,27 @@ gotoProtectedMode:
 
 [bits 32]
 b32:
-	mov dl, 0x06
-rainbow:
-	mov eax, 0xa0000	
-	add dl, 1
-	jmp delay
-doshit:
-	mov [eax], dl
-	add eax, 1
-	cmp eax, 0xa0000 + 64000
-	je rainbow
-	jmp doshit
+	mov ax, DATA_SEG
+	mov dx, ax
+	mov ss, ax
+	mov es, ax
+	mov fs, ax
+	mov gs, ax
 
-delay:
-	mov ebx, 0
-add_del:
-	cmp ebx, 1;00000000
-	je doshit
-	add ebx, 1
-	jmp add_del
+	mov ebp, 0x90000
+	mov esp, ebp
+
+	jmp KERNEL_LOC
+	;mov dl, 0x06
+	;mov eax, 0xa0000	
+	;add dl, 1
+;next_pixel:
+	;mov [eax], dl
+	;add eax, 1
+	;cmp eax, 0xa0000 + 64000
+	;je KERNEL_LOC	 ; if we're done with the screen go to kernel
+	;jmp next_pixel
+
 
 times 510-($-$$) db 0x00 ; 
 db 0x55
